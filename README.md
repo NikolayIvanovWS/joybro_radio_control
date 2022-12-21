@@ -1,4 +1,4 @@
-#Файлы для джойстика JoyBro и платы TurtleBoard
+# Файлы для джойстика JoyBro и платы TurtleBoard
 
 
 ### Папка HC-12-conf-MEGA
