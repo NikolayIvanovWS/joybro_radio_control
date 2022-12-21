@@ -1,0 +1,173 @@
+#include <OLED_I2C.h>
+
+
+OLED  myOLED(SDA, SCL, 8);
+extern uint8_t SmallFont[];
+
+
+// Wiring
+
+#define BTN1 A0
+#define BTN2 13
+#define BTN4 12
+#define BTN5 5
+
+#define POT2 A3
+#define POT4 8
+
+#define SW1 6
+#define SW2 7
+#define SW3 11
+
+#define LJX A1
+#define LJY A2
+#define LJS A4
+
+#define RJX 10
+#define RJY 9
+#define RJS 4
+
+#define SetPin A5
+
+
+String StateLog = "";
+String ReciveLog = "";
+
+
+String BtnLog = "";
+String PotLog = "";
+String SwLog = "";
+String LjLog = "";
+String RjLog = "";
+String str = "";
+
+
+void setup() {
+
+
+  pinMode(BTN1, INPUT);
+  pinMode(BTN2, INPUT);
+  pinMode(BTN4, INPUT);
+  pinMode(BTN5, INPUT);
+
+  pinMode(POT2, INPUT);
+  pinMode(POT4, INPUT);
+  
+  pinMode(SW1, INPUT);
+  pinMode(SW2, INPUT);
+  pinMode(SW3, INPUT);
+  
+  pinMode(LJX, INPUT);
+  pinMode(LJY, INPUT);
+  pinMode(LJS, INPUT);
+
+  pinMode(RJX, INPUT);
+  pinMode(RJY, INPUT);
+  pinMode(RJS, INPUT);
+
+  pinMode(SetPin, OUTPUT);
+  digitalWrite(SetPin, HIGH);
+
+
+  Serial1.begin(9600);
+  //Serial1.setTimeout(200);
+
+  Serial.begin(9600);
+
+  myOLED.begin();
+  myOLED.setFont(SmallFont);
+
+}
+
+void loop() {
+  //Scan();
+  getPos();
+  myOLED.clrScr();
+  myOLED.print("Received string:", LEFT, 0);
+  //myOLED.print(BtnLog, CENTER, 14);
+  //myOLED.print(PotLog, CENTER, 24);
+  //myOLED.print(SwLog, CENTER, 34);
+  //myOLED.print(LjLog, CENTER, 44);
+  //myOLED.print(RjLog, CENTER, 54);
+
+  myOLED.print(ReciveLog, CENTER, 24);
+  myOLED.print(str, CENTER, 44);
+  myOLED.update();
+  
+  delay (40);
+
+}
+
+
+
+float Scan()
+{
+
+ BtnLog =  String(digitalRead(BTN1)) + "|"
+          +String(digitalRead(BTN2)) + "|"
+          +String(digitalRead(BTN4)) + "|"
+          +String(digitalRead(BTN5)) + "|"
+          ;
+
+
+ PotLog =  String(analogRead(POT2)) + "|"
+          +String(analogRead(POT4)) + "|"
+          ;
+
+ SwLog =   String(digitalRead(SW1)) + "|"
+          +String(digitalRead(SW2)) + "|"
+          +String(digitalRead(SW3)) + "|"
+          ;
+          
+ LjLog =   String(analogRead(LJX)) + "|"
+          +String(analogRead(LJY)) + "|"
+          +String(digitalRead(LJS)) + "|"
+          ;
+          
+ RjLog =   String(analogRead(RJX)) + "|"
+          +String(analogRead(RJY)) + "|"
+          +String(digitalRead(RJS))
+          ;
+
+StateLog = BtnLog + PotLog + SwLog + LjLog + RjLog;             
+
+
+    //Serial.println(StateLog);
+    //Serial1.println(StateLog); // закидываем в радиоканал
+
+ 
+}
+
+float getPos ()
+{
+    if(Serial1.available() > 0) {
+      
+        //str = Serial1.readStringUntil('\r'); //CL+LF
+        str = Serial1.readStringUntil('\n');// LF
+        Serial.println("Received string:" + str);
+        Serial.println(str.length());
+        if(str.length() == 16){
+           
+           int device = str.substring(0,2).toInt();
+           int x = str.substring(3,7).toInt();
+           int y = str.substring(8,12).toInt();
+           int angle = str.substring(13,17).toInt();
+           Serial.println("Parsed:" + String(device) + ':' + String(x) + ':' + String(y) + ':' + String(angle));       
+           ReciveLog = String(device) + ':' + String(x) + ':' + String(y) + ':' + String(angle);           
+          }
+        else 
+          {
+            //Serial.println("Received:" + str);
+            //Serial.pri
+           }     
+     } 
+     else 
+       {
+         //Serial.println("no data");
+         //ReciveLog = "no data";
+       }
+     
+
+}
+
+
